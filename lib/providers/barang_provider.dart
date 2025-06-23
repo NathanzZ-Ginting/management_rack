@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../models/barang_model.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
 
 class BarangProvider with ChangeNotifier {
   final List<BarangModel> _barang = [];
@@ -76,6 +78,16 @@ class BarangProvider with ChangeNotifier {
     if (index != -1) {
       _barang[index].stok = stokBaru;
       notifyListeners();
+    }
+  }
+  Future<void> hapusSemuaBarang() async {
+    _barang.clear();
+    notifyListeners();
+
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/barang.json');
+    if (await file.exists()) {
+      await file.delete();
     }
   }
 }
