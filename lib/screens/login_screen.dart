@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
-import 'home_screen.dart';
+import 'menu_screen.dart'; // nanti buat di fase 2
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,18 +15,16 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
 
   void _login() {
-    if (_usernameController.text == 'admin' &&
-        _passwordController.text == '1234') {
-      Provider.of<AuthProvider>(context, listen: false).login();
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Login gagal! Username/Password salah.')),
-      );
-    }
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    Provider.of<AuthProvider>(context, listen: false)
+        .login(username, password);
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (_) => const MenuScreen()),
+    );
   }
 
   @override
@@ -51,7 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ElevatedButton(
               onPressed: _login,
               child: const Text('Login'),
-            ),
+            )
           ],
         ),
       ),

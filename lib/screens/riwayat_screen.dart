@@ -1,0 +1,17 @@
+import 'package:flutter/material.dart';
+
+class RiwayatScreen extends StatelessWidget {
+  const RiwayatScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Riwayat Transaksi'),
+      ),
+      body: const Center(
+        child: Text('Riwayat akan ditampilkan di sini...'),
+      ),
+    );
+  }
+}
