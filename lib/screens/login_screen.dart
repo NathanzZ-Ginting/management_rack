@@ -53,6 +53,19 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // 🔥 Logo di tengah atas
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0), // kasih jarak bawah kecil biar agak naik
+                      child: Image.asset(
+                        'assets/images/logo1.png',
+                        width: 100,
+                        height: 100,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 100), // jarak ke teks "Login Admin"
+
                   const Text(
                     'Login Admin',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
