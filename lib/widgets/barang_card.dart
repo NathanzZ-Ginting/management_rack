@@ -1,104 +1,144 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../models/barang_model.dart';
-import '../providers/barang_provider.dart';
 
 class BarangCard extends StatelessWidget {
   final BarangModel barang;
+
   const BarangCard({super.key, required this.barang});
-
-  void _editHarga(BuildContext context) {
-    final controller = TextEditingController(text: barang.harga.toString());
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Edit Harga'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Harga Baru'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              final hargaBaru = double.tryParse(controller.text);
-              if (hargaBaru != null) {
-                Provider.of<BarangProvider>(context, listen: false)
-                    .updateHarga(barang.id, hargaBaru);
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Simpan'),
-          )
-        ],
-      ),
-    );
-  }
-
-  void _editStok(BuildContext context) {
-    final controller = TextEditingController(text: barang.stok.toString());
-
-    showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Edit Stok'),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: 'Stok Baru'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              final stokBaru = int.tryParse(controller.text);
-              if (stokBaru != null) {
-                Provider.of<BarangProvider>(context, listen: false)
-                    .updateStok(barang.id, stokBaru);
-              }
-              Navigator.pop(context);
-            },
-            child: const Text('Simpan'),
-          )
-        ],
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 3,
-      shadowColor: Colors.grey.shade300,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        title: Text(barang.nama, style: const TextStyle(fontWeight: FontWeight.bold)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Kategori: ${barang.kategori}'),
-            Text('Stok: ${barang.stok}'),
-            Text('Harga: Rp ${barang.harga.toStringAsFixed(0)}'),
-          ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    int fullStars = barang.rating.floor();
+    bool hasHalfStar = (barang.rating - fullStars) >= 0.5;
+
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? Colors.grey[850] : Colors.white,
+        border: Border.all(
+          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
         ),
-        trailing: PopupMenuButton(
-          onSelected: (value) {
-            if (value == 'harga') {
-              _editHarga(context);
-            } else if (value == 'stok') {
-              _editStok(context);
-            } else if (value == 'hapus') {
-              Provider.of<BarangProvider>(context, listen: false)
-                  .hapusBarang(barang.id);
-            }
-          },
-          itemBuilder: (_) => [
-            const PopupMenuItem(value: 'harga', child: Text('Edit Harga')),
-            const PopupMenuItem(value: 'stok', child: Text('Edit Stok')),
-            const PopupMenuItem(value: 'hapus', child: Text('Hapus Barang')),
-          ],
-        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black26 : Colors.grey.withOpacity(0.1),
+            blurRadius: 6,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Gambar produk (dari file)
+          barang.gambar.isNotEmpty && File(barang.gambar).existsSync()
+              ? ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: Image.file(
+              File(barang.gambar),
+              height: 160,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          )
+              : Container(
+            height: 160,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: isDark ? Colors.grey[800] : Colors.grey[100],
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.inventory_2,
+              size: 64,
+              color: Colors.blue,
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          Text(
+            barang.nama,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+
+          const SizedBox(height: 6),
+
+          Text(
+            'Kategori: ${barang.kategori}',
+            style: TextStyle(
+              fontSize: 14,
+              color: isDark ? Colors.grey[300] : Colors.grey[700],
+            ),
+          ),
+
+          const SizedBox(height: 8),
+
+          // Rating dinamis
+          Row(
+            children: [
+              Row(
+                children: List.generate(5, (index) {
+                  if (index < fullStars) {
+                    return const Icon(Icons.star, color: Colors.amber, size: 18);
+                  } else if (index == fullStars && hasHalfStar) {
+                    return const Icon(Icons.star_half, color: Colors.amber, size: 18);
+                  } else {
+                    return const Icon(Icons.star_border, color: Colors.grey, size: 18);
+                  }
+                }),
+              ),
+              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.blue[100],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  barang.rating.toStringAsFixed(1),
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Rp ${barang.harga.toStringAsFixed(0)}',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+              ),
+              Text(
+                'Stok: ${barang.stok}',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: isDark ? Colors.grey[300] : Colors.grey[700],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
