@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/barang_model.dart';
+import '../providers/barang_provider.dart';
 
 class BarangCard extends StatelessWidget {
   final BarangModel barang;
@@ -10,9 +12,7 @@ class BarangCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    int fullStars = barang.rating.floor();
-    bool hasHalfStar = (barang.rating - fullStars) >= 0.5;
+    final barangProvider = Provider.of<BarangProvider>(context, listen: false);
 
     return Container(
       width: double.infinity,
@@ -35,25 +35,23 @@ class BarangCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Gambar produk (dari file)
-          barang.gambar.isNotEmpty && File(barang.gambar).existsSync()
-              ? ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: Image.file(
-              File(barang.gambar),
-              height: 160,
-              width: double.infinity,
-              fit: BoxFit.cover,
-            ),
-          )
-              : Container(
+          // Gambar atau icon
+          Container(
             height: 160,
             width: double.infinity,
             decoration: BoxDecoration(
               color: isDark ? Colors.grey[800] : Colors.grey[100],
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(
+            child: barang.gambar.isNotEmpty
+                ? ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.file(
+                File(barang.gambar),
+                fit: BoxFit.cover,
+              ),
+            )
+                : const Icon(
               Icons.inventory_2,
               size: 64,
               color: Colors.blue,
@@ -62,13 +60,71 @@ class BarangCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
-          Text(
-            barang.nama,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white : Colors.black87,
-            ),
+          // Judul + tombol titik tiga
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  barang.nama,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+              PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'stok') {
+                    _showEditDialog(
+                      context,
+                      title: 'Edit Stok',
+                      initialValue: barang.stok.toString(),
+                      onSave: (val) {
+                        final newStok = int.tryParse(val);
+                        if (newStok != null) {
+                          barangProvider.updateStok(barang.id, newStok);
+                        }
+                      },
+                    );
+                  } else if (value == 'harga') {
+                    _showEditDialog(
+                      context,
+                      title: 'Edit Harga',
+                      initialValue: barang.harga.toStringAsFixed(0),
+                      onSave: (val) {
+                        final newHarga = double.tryParse(val);
+                        if (newHarga != null) {
+                          barangProvider.tambahBarang(
+                            barang.nama,
+                            barang.kategori,
+                            newHarga,
+                            barang.stok,
+                            gambar: barang.gambar,
+                            rating: barang.rating,
+                          );
+                          barangProvider.hapusBarang(barang.id);
+                        }
+                      },
+                    );
+                  } else if (value == 'hapus') {
+                    barangProvider.hapusBarang(barang.id);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(value: 'stok', child: Text('Edit Stok')),
+                  const PopupMenuItem(value: 'harga', child: Text('Edit Harga')),
+                  const PopupMenuItem(
+                    value: 'hapus',
+                    child: Text(
+                      'Hapus Barang',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
 
           const SizedBox(height: 6),
@@ -83,15 +139,13 @@ class BarangCard extends StatelessWidget {
 
           const SizedBox(height: 8),
 
-          // Rating dinamis
+          // Rating
           Row(
             children: [
               Row(
                 children: List.generate(5, (index) {
-                  if (index < fullStars) {
+                  if (index < barang.rating.floor()) {
                     return const Icon(Icons.star, color: Colors.amber, size: 18);
-                  } else if (index == fullStars && hasHalfStar) {
-                    return const Icon(Icons.star_half, color: Colors.amber, size: 18);
                   } else {
                     return const Icon(Icons.star_border, color: Colors.grey, size: 18);
                   }
@@ -137,6 +191,40 @@ class BarangCard extends StatelessWidget {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEditDialog(
+      BuildContext context, {
+        required String title,
+        required String initialValue,
+        required Function(String) onSave,
+      }) {
+    final controller = TextEditingController(text: initialValue);
+
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: Text(title),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.number,
+          decoration: const InputDecoration(border: OutlineInputBorder()),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              onSave(controller.text);
+              Navigator.pop(context);
+            },
+            child: const Text('Simpan'),
           ),
         ],
       ),

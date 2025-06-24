@@ -3,8 +3,25 @@ import '../models/barang_model.dart';
 
 class BarangProvider with ChangeNotifier {
   final List<BarangModel> _semuaBarang = [];
+  String _query = '';
 
-  List<BarangModel> get semuaBarang => _semuaBarang;
+  List<BarangModel> get semuaBarang {
+    if (_query.isEmpty) return _semuaBarang;
+    return _semuaBarang.where((barang) =>
+    barang.nama.toLowerCase().contains(_query.toLowerCase()) ||
+        barang.kategori.toLowerCase().contains(_query.toLowerCase())
+    ).toList();
+  }
+
+  void setSearchQuery(String value) {
+    _query = value;
+    notifyListeners();
+  }
+
+  void resetSearch() {
+    _query = '';
+    notifyListeners();
+  }
 
   void tambahBarang(
       String nama,
