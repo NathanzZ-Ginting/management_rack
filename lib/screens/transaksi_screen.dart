@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import '../models/barang_model.dart';
 import '../providers/barang_provider.dart';
 import '../services/log_service.dart';
+import '../widgets/breadcrumb_widget.dart';
+import '../providers/theme_provider.dart';
 
 class TransaksiScreen extends StatefulWidget {
   const TransaksiScreen({super.key});
@@ -44,11 +46,9 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
       return;
     }
 
-    // Kurangi stok
     final provider = Provider.of<BarangProvider>(context, listen: false);
     provider.updateStok(barangDipilih!.id, barangDipilih!.stok - jumlah);
 
-    // Tambahkan ke log
     LogService.tambahGlobalLog(
       'Terjual: ${barangDipilih!.nama} sebanyak $jumlah pcs',
     );
@@ -59,9 +59,19 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
   @override
   Widget build(BuildContext context) {
     final barangList = Provider.of<BarangProvider>(context).semuaBarang;
+    final isDark = Provider.of<ThemeProvider>(context).isDarkMode;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Transaksi Terjual')),
+      appBar: AppBar(
+        backgroundColor: isDark ? Colors.grey[900] : Colors.white,
+        iconTheme: IconThemeData(color: isDark ? Colors.white : Colors.black),
+        titleTextStyle: TextStyle(
+          color: isDark ? Colors.white : Colors.black,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        title: const Breadcrumb(items: ['Home', 'Data Barang', 'Transaksi Terjual']),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
