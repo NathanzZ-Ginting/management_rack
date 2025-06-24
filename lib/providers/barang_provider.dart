@@ -1,93 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
 import '../models/barang_model.dart';
-import 'dart:io';
-import 'package:path_provider/path_provider.dart';
 
 class BarangProvider with ChangeNotifier {
-  final List<BarangModel> _barang = [];
+  final List<BarangModel> _semuaBarang = [];
 
-  String _searchQuery = '';
+  List<BarangModel> get semuaBarang => _semuaBarang;
 
-  // Getter untuk semua barang, dengan search filter
-  List<BarangModel> get semuaBarang {
-    if (_searchQuery.isEmpty) {
-      return _barang;
-    } else {
-      return _barang
-          .where((b) => b.nama.toLowerCase().contains(_searchQuery.toLowerCase()))
-          .toList();
-    }
-  }
-
-  // Update pencarian
-  void updateSearchQuery(String query) {
-    _searchQuery = query;
-    notifyListeners();
-  }
-
-  // Tambah barang baru
-  void tambahBarang(String nama, String kategori, double harga, int stok) {
+  void tambahBarang(
+      String nama,
+      String kategori,
+      double harga,
+      int stok, {
+        String gambar = '',
+        double rating = 4.0,
+      }) {
     final barangBaru = BarangModel(
-      id: const Uuid().v4(),
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
       nama: nama,
       kategori: kategori,
       harga: harga,
       stok: stok,
+      gambar: gambar,
+      rating: rating,
     );
-    _barang.add(barangBaru);
+    _semuaBarang.add(barangBaru);
     notifyListeners();
   }
 
-  // Update barang secara keseluruhan
-  void updateBarang(BarangModel updated) {
-    final index = _barang.indexWhere((b) => b.id == updated.id);
-    if (index != -1) {
-      _barang[index] = updated;
-      notifyListeners();
-    }
-  }
-
-  // Hapus barang
-  void hapusBarang(String id) {
-    _barang.removeWhere((b) => b.id == id);
-    notifyListeners();
-  }
-
-  // Kurangi stok
-  void kurangiStok(String id, int jumlah) {
-    final index = _barang.indexWhere((b) => b.id == id);
-    if (index != -1 && _barang[index].stok >= jumlah) {
-      _barang[index].stok -= jumlah;
-      notifyListeners();
-    }
-  }
-
-  // ✅ Update harga spesifik
-  void updateHarga(String id, double hargaBaru) {
-    final index = _barang.indexWhere((b) => b.id == id);
-    if (index != -1) {
-      _barang[index].harga = hargaBaru;
-      notifyListeners();
-    }
-  }
-
-  // ✅ Update stok spesifik
   void updateStok(String id, int stokBaru) {
-    final index = _barang.indexWhere((b) => b.id == id);
+    final index = _semuaBarang.indexWhere((b) => b.id == id);
     if (index != -1) {
-      _barang[index].stok = stokBaru;
+      final barang = _semuaBarang[index];
+      _semuaBarang[index] = BarangModel(
+        id: barang.id,
+        nama: barang.nama,
+        kategori: barang.kategori,
+        harga: barang.harga,
+        stok: stokBaru,
+        gambar: barang.gambar,
+        rating: barang.rating,
+      );
       notifyListeners();
     }
   }
-  Future<void> hapusSemuaBarang() async {
-    _barang.clear();
-    notifyListeners();
 
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File('${dir.path}/barang.json');
-    if (await file.exists()) {
-      await file.delete();
-    }
+  void hapusBarang(String id) {
+    _semuaBarang.removeWhere((barang) => barang.id == id);
+    notifyListeners();
   }
 }
