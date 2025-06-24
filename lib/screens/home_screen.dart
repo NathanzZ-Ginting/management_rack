@@ -4,6 +4,7 @@ import '../providers/barang_provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/auth_provider.dart';
 import '../widgets/barang_card.dart';
+import '../widgets/breadcrumb_widget.dart';
 import 'tambah_barang_screen.dart';
 import 'transaksi_screen.dart';
 import 'login_screen.dart';
@@ -43,19 +44,29 @@ class HomeScreen extends StatelessWidget {
     final barangProvider = Provider.of<BarangProvider>(context);
     final semuaBarang = barangProvider.semuaBarang;
     final themeProvider = Provider.of<ThemeProvider>(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Data Barang'),
+        backgroundColor: isDark ? Colors.grey[900] : Colors.blue,
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.white),
+        titleTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+        title: const Breadcrumb(items: ['Home', 'Data Barang']),
         actions: [
           IconButton(
             icon: Icon(
               themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              color: Colors.white,
             ),
             onPressed: () => themeProvider.toggleTheme(),
           ),
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon: const Icon(Icons.logout, color: Colors.white),
             onPressed: () => _konfirmasiLogout(context),
           ),
         ],
