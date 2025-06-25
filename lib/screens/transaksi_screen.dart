@@ -47,7 +47,7 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
     }
 
     final provider = Provider.of<BarangProvider>(context, listen: false);
-    provider.updateStok(barangDipilih!.id, barangDipilih!.stok - jumlah);
+    provider.tambahTransaksi(barangDipilih!.id, jumlah); // <== pastikan ini ada di provider
 
     LogService.tambahGlobalLog(
       'Terjual: ${barangDipilih!.nama} sebanyak $jumlah pcs',

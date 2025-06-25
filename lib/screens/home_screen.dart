@@ -9,13 +9,34 @@ import 'tambah_barang_screen.dart';
 import 'transaksi_screen.dart';
 import 'login_screen.dart';
 
-// bagian import tetap
-// ...
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
   void _konfirmasiLogout(BuildContext context) {
-    // tidak diubah
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Yakin ingin logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+              );
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -27,6 +48,10 @@ class HomeScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
         backgroundColor: isDark ? Colors.grey[900] : Colors.blue,
         elevation: 1,
         iconTheme: const IconThemeData(color: Colors.white),
@@ -36,54 +61,16 @@ class HomeScreen extends StatelessWidget {
           fontWeight: FontWeight.bold,
         ),
         title: const Breadcrumb(items: ['Home', 'Data Barang']),
-        actions: [
-          IconButton(
-            icon: Icon(
-              themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
-              color: Colors.white,
-            ),
-            onPressed: () => themeProvider.toggleTheme(),
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () => _konfirmasiLogout(context),
-          ),
-        ],
       ),
-      body: Column(
-        children: [
-          // 🔍 Search bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
-              onChanged: barangProvider.setSearchQuery,
-              decoration: InputDecoration(
-                hintText: 'Cari nama atau kategori barang...',
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: isDark ? Colors.grey[800] : Colors.grey[200],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
-
-          // 📦 List Barang
-          Expanded(
-            child: semuaBarang.isEmpty
-                ? const Center(child: Text('Belum ada barang.'))
-                : ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: semuaBarang.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (_, index) {
-                return BarangCard(barang: semuaBarang[index]);
-              },
-            ),
-          ),
-        ],
+      body: semuaBarang.isEmpty
+          ? const Center(child: Text('Belum ada barang.'))
+          : ListView.separated(
+        padding: const EdgeInsets.all(16),
+        itemCount: semuaBarang.length,
+        separatorBuilder: (_, __) => const SizedBox(height: 10),
+        itemBuilder: (_, index) {
+          return BarangCard(barang: semuaBarang[index]);
+        },
       ),
       floatingActionButton: Row(
         mainAxisAlignment: MainAxisAlignment.end,

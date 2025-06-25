@@ -3,25 +3,10 @@ import '../models/barang_model.dart';
 
 class BarangProvider with ChangeNotifier {
   final List<BarangModel> _semuaBarang = [];
-  String _query = '';
+  double _saldo = 0;
 
-  List<BarangModel> get semuaBarang {
-    if (_query.isEmpty) return _semuaBarang;
-    return _semuaBarang.where((barang) =>
-    barang.nama.toLowerCase().contains(_query.toLowerCase()) ||
-        barang.kategori.toLowerCase().contains(_query.toLowerCase())
-    ).toList();
-  }
-
-  void setSearchQuery(String value) {
-    _query = value;
-    notifyListeners();
-  }
-
-  void resetSearch() {
-    _query = '';
-    notifyListeners();
-  }
+  List<BarangModel> get semuaBarang => _semuaBarang;
+  double get saldo => _saldo;
 
   void tambahBarang(
       String nama,
@@ -57,6 +42,27 @@ class BarangProvider with ChangeNotifier {
         gambar: barang.gambar,
         rating: barang.rating,
       );
+      notifyListeners();
+    }
+  }
+
+  void tambahTransaksi(String id, int jumlahTerjual) {
+    final index = _semuaBarang.indexWhere((b) => b.id == id);
+    if (index != -1) {
+      final barang = _semuaBarang[index];
+      final hargaTotal = barang.harga * jumlahTerjual;
+
+      _semuaBarang[index] = BarangModel(
+        id: barang.id,
+        nama: barang.nama,
+        kategori: barang.kategori,
+        harga: barang.harga,
+        stok: barang.stok - jumlahTerjual,
+        gambar: barang.gambar,
+        rating: barang.rating,
+      );
+
+      _saldo += hargaTotal;
       notifyListeners();
     }
   }

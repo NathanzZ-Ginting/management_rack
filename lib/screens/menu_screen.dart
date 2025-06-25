@@ -1,13 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
+import '../providers/theme_provider.dart';
+import '../providers/barang_provider.dart';
 import 'home_screen.dart';
 import 'riwayat_screen.dart';
+import 'login_screen.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
 
+  void _konfirmasiLogout(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Yakin ingin logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Provider.of<AuthProvider>(context, listen: false).logout();
+              Navigator.pushAndRemoveUntil(
+                context,
+                MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    (route) => false,
+              );
+            },
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final barangProv = Provider.of<BarangProvider>(context);
+    final totalSaldo = barangProv.saldo;
 
     return Scaffold(
       body: SafeArea(
@@ -15,28 +50,50 @@ class MenuScreen extends StatelessWidget {
           children: [
             const SizedBox(height: 40),
 
-            // Header Tengah Atas
-            Center(
-              child: Text(
-                'Home',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: isDark ? Colors.white : Colors.black,
-                ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Navigation',
+                    style: TextStyle(
+                      fontSize: 28,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          themeProvider.isDarkMode
+                              ? Icons.light_mode
+                              : Icons.dark_mode,
+                        ),
+                        onPressed: () => themeProvider.toggleTheme(),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.logout),
+                        onPressed: () => _konfirmasiLogout(context),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 50),
+            const SizedBox(height: 40),
 
-            // Tombol Navigasi
             Expanded(
-              child: Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // Tombol Kelola Barang (biru)
                     ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 60),
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -45,33 +102,12 @@ class MenuScreen extends StatelessWidget {
                       },
                       icon: const Icon(Icons.inventory),
                       label: const Text('Kelola Barang'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: isDark ? Colors.blue.shade500 : Colors.blue.shade700,
-                        backgroundColor: Colors.transparent,
-                        side: BorderSide(
-                          color: isDark ? Colors.blue.shade500 : Colors.blue.shade700,
-                        ),
-                        shadowColor: Colors.transparent,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                      ).copyWith(
-                        overlayColor: MaterialStateProperty.all(
-                          isDark
-                              ? Colors.blue.shade500.withOpacity(0.1)
-                              : Colors.blue.shade100,
-                        ),
-                      ),
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Tombol Riwayat Transaksi (merah)
                     ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 60),
+                      ),
                       onPressed: () {
                         Navigator.push(
                           context,
@@ -81,28 +117,35 @@ class MenuScreen extends StatelessWidget {
                       },
                       icon: const Icon(Icons.history),
                       label: const Text('Riwayat Transaksi'),
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: isDark ? Colors.red.shade400 : Colors.red.shade700,
-                        backgroundColor: Colors.transparent,
-                        side: BorderSide(
-                          color: isDark ? Colors.red.shade400 : Colors.red.shade700,
-                        ),
-                        shadowColor: Colors.transparent,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 20, vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                      ).copyWith(
-                        overlayColor: MaterialStateProperty.all(
-                          isDark
-                              ? Colors.red.shade400.withOpacity(0.1)
-                              : Colors.red.shade100,
-                        ),
-                      ),
                     ),
+                    const SizedBox(height: 40),
+
+                    // Saldo
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.blue[50],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          const Text(
+                            'Saldo Saat Ini',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            'Rp ${totalSaldo.toStringAsFixed(0)}',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
                   ],
                 ),
               ),
