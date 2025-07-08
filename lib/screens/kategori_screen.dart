@@ -50,7 +50,7 @@ class _KategoriScreenState extends State<KategoriScreen> {
                 itemCount: _kategori.length,
                 separatorBuilder: (_, __) => const Divider(),
                 itemBuilder: (_, index) {
-                  return ListTile(
+                  return ListTile
                     title: Text(_kategori[index]),
                     trailing: IconButton(
                       icon: const Icon(Icons.delete),
