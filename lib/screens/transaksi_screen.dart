@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/barang_model.dart';
 import '../providers/barang_provider.dart';
-import '../services/log_service.dart';
 import '../widgets/breadcrumb_widget.dart';
 import '../providers/theme_provider.dart';
 
@@ -23,7 +22,7 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
     super.dispose();
   }
 
-  void _prosesTransaksi() {
+  void _prosesTransaksi() async {
     if (barangDipilih == null || _jumlahController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Pilih barang dan masukkan jumlah')),
@@ -46,11 +45,11 @@ class _TransaksiScreenState extends State<TransaksiScreen> {
       return;
     }
 
-    final provider = Provider.of<BarangProvider>(context, listen: false);
-    provider.tambahTransaksi(barangDipilih!.id, jumlah); // <== pastikan ini ada di provider
+    final barangProvider = Provider.of<BarangProvider>(context, listen: false);
+    await barangProvider.tambahTransaksi(barangDipilih!.id, jumlah); // ✅ hanya pakai ini
 
-    LogService.tambahGlobalLog(
-      'Terjual: ${barangDipilih!.nama} sebanyak $jumlah pcs',
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Transaksi berhasil disimpan')),
     );
 
     Navigator.pop(context);
