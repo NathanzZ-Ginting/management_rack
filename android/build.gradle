@@ -1,3 +1,15 @@
+buildscript {
+    ext.kotlin_version = '2.1.0' // ✅ atau yang lebih baru dari 2.x, boleh juga '2.0.0' atau '2.1.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2' // versi tools lu (optional)
+        classpath 'com.google.gms:google-services:4.4.1'
+    }
+}
+
 allprojects {
     repositories {
         google()
