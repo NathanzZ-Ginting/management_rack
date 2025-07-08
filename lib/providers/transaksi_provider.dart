@@ -1,26 +1,36 @@
 import 'package:flutter/material.dart';
-import '../models/barang_model.dart';
-
-class TransaksiModel {
-  final BarangModel barang;
-  final int jumlah;
-
-  TransaksiModel({required this.barang, required this.jumlah});
-}
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TransaksiProvider with ChangeNotifier {
-  final List<TransaksiModel> _semuaTransaksi = [];
+  double _totalSaldo = 0;
+  double get totalSaldo => _totalSaldo;
 
-  List<TransaksiModel> get semuaTransaksi => _semuaTransaksi;
+  final CollectionReference _transaksiRef =
+  FirebaseFirestore.instance.collection('transaksi');
 
-  void tambahTransaksi(BarangModel barang, int jumlah) {
-    _semuaTransaksi.add(TransaksiModel(barang: barang, jumlah: jumlah));
+  TransaksiProvider() {
+    _ambilSemuaTransaksi(); // ambil data saldo dari histori transaksi
+  }
+
+  Future<void> _ambilSemuaTransaksi() async {
+    final snapshot = await _transaksiRef.get();
+    double total = 0;
+    for (var doc in snapshot.docs) {
+      // adaptasi field apa pun yang tersedia
+      final double nilai = (doc['total'] ?? doc['totalHarga'] ?? 0).toDouble();
+      total += nilai;
+    }
+    _totalSaldo = total;
     notifyListeners();
   }
 
-  int get totalTerjual =>
-      _semuaTransaksi.fold(0, (sum, t) => sum + t.jumlah);
-
-  double get totalSaldo =>
-      _semuaTransaksi.fold(0.0, (sum, t) => sum + (t.barang.harga * t.jumlah));
+  // Hapus semua transaksi (opsional)
+  Future<void> resetTransaksi() async {
+    final snapshot = await _transaksiRef.get();
+    for (var doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
+    _totalSaldo = 0;
+    notifyListeners();
+  }
 }
