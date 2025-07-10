@@ -12,10 +12,10 @@ class BarangProvider with ChangeNotifier {
   double get saldo => _saldo;
 
   BarangProvider() {
-    _ambilBarangDariFirestore(); // 🔁 Auto listen
+    _ambilBarangDariFirestore();
+    _ambilSaldoDariFirestore(); // ambil saldo saat init
   }
 
-  // ✅ Real-time listener
   void _ambilBarangDariFirestore() {
     _barangCollection.snapshots().listen((snapshot) {
       _semuaBarang.clear();
@@ -33,6 +33,15 @@ class BarangProvider with ChangeNotifier {
       }
       notifyListeners();
     });
+  }
+
+  void _ambilSaldoDariFirestore() async {
+    final doc =
+    await FirebaseFirestore.instance.collection('meta').doc('saldo').get();
+    if (doc.exists) {
+      _saldo = (doc.data()!['jumlah'] as num).toDouble();
+      notifyListeners();
+    }
   }
 
   Future<void> tambahBarang(
@@ -75,20 +84,44 @@ class BarangProvider with ChangeNotifier {
       'stok': stokSekarang - jumlahTerjual,
     });
 
-    // 💾 Tambahkan transaksi ke koleksi Firestore
     await FirebaseFirestore.instance.collection('transaksi').add({
       'barangId': id,
       'namaBarang': namaBarang,
       'jumlah': jumlahTerjual,
-      'totalHarga': totalHarga.toInt(),
-      'tanggal': DateTime.now().toIso8601String(),
+      'total': totalHarga,
+      'harga': harga,
+      'tanggal': Timestamp.now(),
     });
 
     _saldo += totalHarga;
     notifyListeners();
+
+    // Simpan saldo
+    await FirebaseFirestore.instance
+        .collection('meta')
+        .doc('saldo')
+        .set({'jumlah': _saldo});
   }
 
   Future<void> hapusBarang(String id) async {
     await _barangCollection.doc(id).delete();
+  }
+
+  Future<void> resetSaldo() async {
+    // Hapus semua transaksi
+    final snapshot =
+    await FirebaseFirestore.instance.collection('transaksi').get();
+    for (var doc in snapshot.docs) {
+      await doc.reference.delete();
+    }
+
+    // Set saldo jadi 0
+    _saldo = 0;
+    notifyListeners();
+
+    await FirebaseFirestore.instance
+        .collection('meta')
+        .doc('saldo')
+        .set({'jumlah': 0});
   }
 }
