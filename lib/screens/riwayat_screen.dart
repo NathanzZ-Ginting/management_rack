@@ -1,75 +1,69 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
-import '../providers/transaksi_riwayat_provider.dart';
 
-class RiwayatScreen extends StatefulWidget {
+class RiwayatScreen extends StatelessWidget {
   const RiwayatScreen({super.key});
 
   @override
-  State<RiwayatScreen> createState() => _RiwayatScreenState();
-}
-
-class _RiwayatScreenState extends State<RiwayatScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Provider.of<TransaksiRiwayatProvider>(context, listen: false).ambilRiwayat();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final riwayat = Provider.of<TransaksiRiwayatProvider>(context).riwayat;
     final dateFormat = DateFormat('dd MMM yyyy – HH:mm');
+    final transaksiRef = FirebaseFirestore.instance.collection('transaksi').orderBy('tanggal', descending: true);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Riwayat Transaksi (Firestore)'),
+        title: const Text('Riwayat Transaksi'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: riwayat.isEmpty
-            ? const Center(child: Text('Belum ada transaksi'))
-            : ListView.builder(
-          itemCount: riwayat.length,
-          itemBuilder: (context, index) {
-            final data = riwayat[index];
-            final tanggal = DateTime.tryParse(data['tanggal'] ?? '') ?? DateTime.now();
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: transaksiRef.snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return const Center(child: Text('Belum ada transaksi'));
+          }
+
+          final transaksiList = snapshot.data!.docs;
+
+          return ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: transaksiList.length,
+            itemBuilder: (context, index) {
+              final data = transaksiList[index].data() as Map<String, dynamic>;
+
+              final nama = data['namaBarang'] ?? 'Barang';
+              final jumlah = data['jumlah'] ?? 0;
+              final total = data['total'] ?? 0;
+              final rawTanggal = data['tanggal'];
+              final tanggal = rawTanggal is Timestamp
+                  ? rawTanggal.toDate()
+                  : DateTime.tryParse(rawTanggal.toString()) ?? DateTime.now();
+
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      margin: const EdgeInsets.only(right: 8),
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                    Text(
+                      nama,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
+                    const SizedBox(height: 4),
+                    Text('Jumlah: $jumlah'),
+                    Text('Total: Rp $total'),
                     Text(
                       dateFormat.format(tanggal),
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey.shade600,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
+                    const Divider(),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  '${data['namaBarang']} - ${data['jumlah']} pcs, Total: Rp${data['totalHarga'].toString()}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(height: 16),
-                const Divider(height: 1),
-                const SizedBox(height: 16),
-              ],
-            );
-          },
-        ),
+              );
+            },
+          );
+        },
       ),
     );
   }
