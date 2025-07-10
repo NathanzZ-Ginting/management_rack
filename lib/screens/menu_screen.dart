@@ -145,6 +145,51 @@ class MenuScreen extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // Tombol Reset Saldo
+                    ElevatedButton.icon(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50),
+                        backgroundColor: Colors.redAccent,
+                      ),
+                      onPressed: () async {
+                        final konfirmasi = await showDialog<bool>(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: const Text('Reset Saldo'),
+                            content: const Text(
+                              'Semua transaksi akan dihapus dan saldo akan diset ke 0. Yakin?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () =>
+                                    Navigator.pop(context, false),
+                                child: const Text('Batal'),
+                              ),
+                              ElevatedButton(
+                                onPressed: () =>
+                                    Navigator.pop(context, true),
+                                child: const Text('Reset'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (konfirmasi == true) {
+                          await barangProv.resetSaldo();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  '✅ Saldo & Transaksi berhasil direset'),
+                            ),
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Reset Saldo'),
                     )
                   ],
                 ),
