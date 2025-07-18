@@ -14,14 +14,61 @@ class MenuScreen extends StatelessWidget {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Yakin ingin logout?'),
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? const Color(0xFF1F2937) // dark:bg-gray-800
+            : const Color(0xFFFFF1F1), // bg-red-50
+        titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFF991B1B) // dark:border-red-800
+                : const Color(0xFFFCA5A5), // border-red-300
+          ),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_rounded, color: Color(0xFFB91C1C), size: 24), // text-red-800
+            const SizedBox(width: 8),
+            Text(
+              'Logout',
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFFF87171) // dark:text-red-400
+                    : const Color(0xFFB91C1C), // text-red-800
+              ),
+            ),
+          ],
+        ),
+        content: Text(
+          'Yakin ingin logout?',
+          style: TextStyle(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? const Color(0xFFFCA5A5)
+                : const Color(0xFF7F1D1D),
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Batal'),
+            child: Text(
+              'Batal',
+              style: TextStyle(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.grey[300]
+                    : Colors.grey[800],
+              ),
+            ),
           ),
           ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFDC2626), // bg-red-600
+              foregroundColor: Colors.white,
+            ),
             onPressed: () {
               Provider.of<AuthProvider>(context, listen: false).logout();
               Navigator.pushAndRemoveUntil(
@@ -49,7 +96,6 @@ class MenuScreen extends StatelessWidget {
         child: Column(
           children: [
             const SizedBox(height: 40),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24.0),
               child: Row(
@@ -81,9 +127,7 @@ class MenuScreen extends StatelessWidget {
                 ],
               ),
             ),
-
             const SizedBox(height: 40),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
@@ -119,8 +163,6 @@ class MenuScreen extends StatelessWidget {
                       label: const Text('Riwayat Transaksi'),
                     ),
                     const SizedBox(height: 40),
-
-                    // Saldo
                     Container(
                       width: double.infinity,
                       padding: const EdgeInsets.all(16),
@@ -146,10 +188,7 @@ class MenuScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-
                     const SizedBox(height: 20),
-
-                    // Tombol Reset Saldo
                     ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
                         minimumSize: const Size(double.infinity, 50),
