@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "598777057660",
+    "project_id": "managementrack",
+    "storage_bucket": "managementrack.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:598777057660:android:a91f07579344cf747d54f9",
+        "android_client_info": {
+          "package_name": "com.example.management_rack"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6cDaNYcIDNP_8fzO7BEAStiRxu_iBVNw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
