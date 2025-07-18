@@ -172,6 +172,7 @@ class BarangCard extends StatelessWidget {
 
           const SizedBox(height: 12),
 
+          // Harga dan Stok
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -183,12 +184,24 @@ class BarangCard extends StatelessWidget {
                   color: isDark ? Colors.white : Colors.black,
                 ),
               ),
-              Text(
-                'Stok: ${barang.stok}',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: isDark ? Colors.grey[300] : Colors.grey[700],
-                ),
+              Row(
+                children: [
+                  Text(
+                    'Stok: ${barang.stok}',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: barang.stok < 5
+                          ? Colors.red
+                          : (isDark ? Colors.grey[300] : Colors.grey[700]),
+                      fontWeight: barang.stok < 5 ? FontWeight.bold : FontWeight.normal,
+                    ),
+                  ),
+                  if (barang.stok < 5)
+                    const Padding(
+                      padding: EdgeInsets.only(left: 6),
+                      child: Icon(Icons.warning_amber_rounded, color: Colors.red, size: 18),
+                    ),
+                ],
               ),
             ],
           ),
