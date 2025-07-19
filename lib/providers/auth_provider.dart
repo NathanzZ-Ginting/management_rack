@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import '../services/shared_prefs_service.dart';
 
 class AuthProvider with ChangeNotifier {
@@ -6,15 +7,31 @@ class AuthProvider with ChangeNotifier {
 
   bool get isLogin => _isLogin;
 
-  void login(String username, String password) {
-    if (username == 'admin' && password == '123') {
-      _isLogin = true;
-      SharedPrefsService.setLoginStatus(true);
-      notifyListeners();
+  Future<void> login(String email, String password) async {
+    try {
+      final userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: email, password: password);
+
+      // Cek apakah email yang login sesuai yang diizinkan
+      if (userCredential.user?.email == 'modezaadminstore@gmail.com') {
+        _isLogin = true;
+        SharedPrefsService.setLoginStatus(true);
+        notifyListeners();
+      } else {
+        // Jika bukan email yg diizinkan, langsung logout lagi
+        await FirebaseAuth.instance.signOut();
+        throw FirebaseAuthException(
+          code: 'email-not-allowed',
+          message: 'Akun tidak diizinkan',
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.message ?? 'Gagal login');
     }
   }
 
-  void logout() {
+  Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
     _isLogin = false;
     SharedPrefsService.clearLogin();
     notifyListeners();
