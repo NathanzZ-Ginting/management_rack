@@ -23,19 +23,44 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  void _login() async {
     if (_formKey.currentState!.validate()) {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      authProvider.login(
-        _usernameController.text.trim(),
-        _passwordController.text.trim(),
-      );
 
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const MenuScreen()),
-      );
+      try {
+        await authProvider.login(
+          _usernameController.text.trim(),
+          _passwordController.text.trim(),
+        );
+
+        if (authProvider.isLogin) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const MenuScreen()),
+          );
+        } else {
+          _showErrorDialog('Username atau PIN salah.');
+        }
+      } catch (e) {
+        _showErrorDialog('Terjadi kesalahan saat login.');
+      }
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Login Gagal'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Tutup'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -46,12 +71,10 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background image
           Image.asset(
             'assets/images/ng.png',
             fit: BoxFit.cover,
           ),
-          // Content
           SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
@@ -174,7 +197,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: ElevatedButton(
                             onPressed: _login,
                             style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              padding:
+                              const EdgeInsets.symmetric(vertical: 14),
                               backgroundColor: Colors.blue[700],
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
