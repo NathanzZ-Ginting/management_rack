@@ -43,129 +43,156 @@ class _LoginScreenState extends State<LoginScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      body: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Form(
-            key: _formKey,
-            child: Container(
-              constraints: const BoxConstraints(maxWidth: 400),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // 🔥 Logo di tengah atas
-                  Center(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0), // kasih jarak bawah kecil biar agak naik
-                      child: Image.asset(
-                        'assets/images/logo1.png',
-                        width: 100,
-                        height: 100,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 100), // jarak ke teks "Login Admin"
-
-                  const Text(
-                    'Login Admin',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Username Field
-                  const Text('Your username', style: TextStyle(fontSize: 14)),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _usernameController,
-                    decoration: InputDecoration(
-                      hintText: 'name@example.com',
-                      filled: true,
-                      fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                    ),
-                    validator: (val) =>
-                    val!.isEmpty ? 'Email tidak boleh kosong' : null,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Password Field
-                  const Text('Your password', style: TextStyle(fontSize: 14)),
-                  const SizedBox(height: 6),
-                  TextFormField(
-                    controller: _passwordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      hintText: '••••••••',
-                      filled: true,
-                      fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
-                        ),
-                      ),
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 14,
-                      ),
-                    ),
-                    validator: (val) =>
-                    val!.isEmpty ? 'Password tidak boleh kosong' : null,
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  // Remember Me Checkbox
-                  Row(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image
+          Image.asset(
+            'assets/images/ng.png',
+            fit: BoxFit.cover,
+          ),
+          // Content
+          SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const SizedBox(height: 80),
+                const Align(
+                  alignment: Alignment.center,
+                  child: Column(
                     children: [
-                      Checkbox(
-                        value: _rememberMe,
-                        onChanged: (val) =>
-                            setState(() => _rememberMe = val!),
-                      ),
                       Text(
-                        'Remember me',
+                        'WELCOME',
                         style: TextStyle(
-                          fontSize: 14,
-                          color: isDark ? Colors.grey[300] : Colors.grey[800],
+                          fontSize: 36,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'OKe PANEL',
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white,
                         ),
                       ),
                     ],
                   ),
-
-                  const SizedBox(height: 16),
-
-                  // Login Button
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _login,
-                      style: ElevatedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        backgroundColor: Colors.blue[700],
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                ),
+                const SizedBox(height: 95),
+                Form(
+                  key: _formKey,
+                  child: Container(
+                    constraints: const BoxConstraints(maxWidth: 400),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Login Admin',
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
                         ),
-                      ),
-                      child: const Text('Submit'),
+                        const SizedBox(height: 24),
+                        const Text(
+                          'Your username',
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _usernameController,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: 'name@example.com',
+                            hintStyle: TextStyle(color: Colors.grey[300]),
+                            filled: true,
+                            fillColor: Colors.black.withOpacity(0.4),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 14,
+                            ),
+                          ),
+                          validator: (val) =>
+                          val!.isEmpty ? 'Email tidak boleh kosong' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Your password',
+                          style: TextStyle(fontSize: 14, color: Colors.white),
+                        ),
+                        const SizedBox(height: 6),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: true,
+                          style: const TextStyle(color: Colors.white),
+                          decoration: InputDecoration(
+                            hintText: '••••••••',
+                            hintStyle: TextStyle(color: Colors.grey[300]),
+                            filled: true,
+                            fillColor: Colors.black.withOpacity(0.4),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 14,
+                              vertical: 14,
+                            ),
+                          ),
+                          validator: (val) =>
+                          val!.isEmpty ? 'Password tidak boleh kosong' : null,
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Checkbox(
+                              value: _rememberMe,
+                              onChanged: (val) =>
+                                  setState(() => _rememberMe = val!),
+                              checkColor: Colors.black,
+                              activeColor: Colors.white,
+                            ),
+                            const Text(
+                              'Remember me',
+                              style:
+                              TextStyle(fontSize: 14, color: Colors.white),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: _login,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              backgroundColor: Colors.blue[700],
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: const Text('Submit'),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 60),
+              ],
             ),
           ),
-        ),
+        ],
       ),
     );
   }
